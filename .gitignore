@@ -1,0 +1,16 @@
+.gradle/
+.gradle-local/
+.manual-build/
+.tmp-wrapper/
+build/
+app/build/
+*.iml
+.idea/
+local.properties
+captures/
+signing/
+*.jks
+*.keystore
+*.p12
+/gitmeta/
+/.git/

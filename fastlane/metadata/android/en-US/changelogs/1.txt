@@ -1,0 +1,1 @@
+First release: local contacts, cleanup triage, duplicate review, vCard export, encrypted vault, and ten Atelier themes.

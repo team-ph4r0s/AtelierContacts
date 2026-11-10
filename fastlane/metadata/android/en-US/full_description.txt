@@ -1,0 +1,1 @@
+Atelier Contacts brings a calm, local-first workspace to a messy address book. Find duplicates, clean names, preserve notes, review birthdays, and export vCards. Data stays on the device, while the encrypted vault uses AES-256-GCM with PBKDF2-HMAC-SHA256.

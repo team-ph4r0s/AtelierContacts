@@ -1,0 +1,107 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    name: Secret-material guard
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4.2.2
+
+      - name: Reject tracked credentials and private keys
+        shell: bash
+        run: |
+          tracked_sensitive=$(git ls-files | grep -E '(^|/)(signing/|local\.properties$|\.env($|\.)|.*\.(jks|keystore|p12|pem|key)$)' || true)
+          if [ -n "$tracked_sensitive" ]; then
+            echo "Sensitive files are tracked:"
+            echo "$tracked_sensitive"
+            exit 1
+          fi
+          if git grep -n -I -E 'BEGIN (RSA|EC|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+|AKIA[0-9A-Z]{16}' -- ':!signing/**'; then
+            echo "Credential-like material found in tracked text."
+            exit 1
+          fi
+
+  verify:
+    name: Test, lint, and assemble
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Make Gradle executable
+        run: chmod +x ./gradlew
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace --no-daemon
+
+      - name: Run Android lint
+        run: ./gradlew lintDebug --stacktrace --no-daemon
+
+      - name: Assemble debug and release artifacts
+        env:
+          SIGNING_KEYSTORE_PATH: ${{ runner.temp }}/atelier-release.jks
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        run: |
+          if [ -n "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.SIGNING_KEYSTORE_BASE64 }}" | base64 --decode > "$SIGNING_KEYSTORE_PATH"
+          fi
+          ./gradlew assembleDebug assembleRelease --stacktrace --no-daemon
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: atelier-contacts-${{ github.sha }}
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [security, verify]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4.2.2
+
+      - name: Download release artifact
+        uses: actions/download-artifact@v4.3.0
+        with:
+          name: atelier-contacts-${{ github.sha }}
+          path: release-artifacts
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            release-artifacts/app/build/outputs/apk/release/*.apk \
+            release-artifacts/app/build/outputs/apk/debug/*.apk \
+            --title "Atelier Contacts $GITHUB_REF_NAME" \
+            --generate-notes

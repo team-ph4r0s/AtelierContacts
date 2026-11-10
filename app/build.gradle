@@ -1,0 +1,65 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'com.google.devtools.ksp'
+
+android {
+    namespace 'team.pharos.ateliercontacts'
+    compileSdk 36
+    defaultConfig {
+        applicationId 'team.pharos.ateliercontacts'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        vectorDrawables.useSupportLibrary = true
+    }
+    def signingKeystorePath = System.getenv('SIGNING_KEYSTORE_PATH')
+    def signingStorePassword = System.getenv('SIGNING_STORE_PASSWORD')
+    def signingKeyAlias = System.getenv('SIGNING_KEY_ALIAS')
+    def signingKeyPassword = System.getenv('SIGNING_KEY_PASSWORD')
+    signingConfigs {
+        release {
+            if (signingKeystorePath && signingStorePassword && signingKeyAlias && signingKeyPassword) {
+                storeFile file(signingKeystorePath)
+                storePassword signingStorePassword
+                keyAlias signingKeyAlias
+                keyPassword signingKeyPassword
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (signingKeystorePath && signingStorePassword && signingKeyAlias && signingKeyPassword) {
+                signingConfig signingConfigs.release
+            }
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+    packaging.resources.excludes += '/META-INF/{AL2.0,LGPL2.1}'
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.16.0'
+    implementation 'androidx.activity:activity-compose:1.12.4'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.9.4'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4'
+    implementation 'androidx.compose.ui:ui:1.9.4'
+    implementation 'androidx.compose.ui:ui-tooling-preview:1.9.4'
+    implementation 'androidx.compose.foundation:foundation:1.9.4'
+    implementation 'androidx.compose.material3:material3:1.4.0-beta01'
+    implementation 'androidx.compose.material:material-icons-extended:1.7.8'
+    implementation 'androidx.room:room-runtime:2.8.1'
+    implementation 'androidx.room:room-ktx:2.8.1'
+    ksp 'androidx.room:room-compiler:2.8.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
+}

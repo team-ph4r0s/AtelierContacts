@@ -1,0 +1,1 @@
+Atelier Contacts — privacy-first local Android contacts workspace with smart cleanup, duplicate merging, birthdays, vCard export, and AES-256-GCM encrypted vault.
