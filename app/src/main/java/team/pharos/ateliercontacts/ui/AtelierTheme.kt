@@ -20,7 +20,7 @@ enum class AtelierTheme(val title: String, val dark: Boolean, val background: Co
     CARBON_ESPRESSO("Carbon Espresso", true, Color(0xFF0D0A08), Color(0xFF17120F), Color(0xFFF2EAE4), Color(0xFFD4A373), Color(0xFF9C8B7E), Color(0xFF332822)),
     MIDNIGHT_VELVET("Midnight Velvet", true, Color(0xFF070913), Color(0xFF101424), Color(0xFFEEF2FF), Color(0xFFA5B4FC), Color(0xFF818CF8), Color(0xFF29324E)),
     EMERALD_NOIR("Emerald Noir", true, Color(0xFF060E0B), Color(0xFF0D1A15), Color(0xFFECFDF5), Color(0xFFD4AF37), Color(0xFF86A397), Color(0xFF233D32)),
-    MONACO_ONYX("Monaco Onyx", true, Color(0xFF0A0A0B), Color(0xFF141416), Color(0xFFFAFAFA), Color(0xFFE5B8A8), Color(0xFF9CA3AF), Color(0xFF2E2E34)
+    MONACO_ONYX("Monaco Onyx", true, Color(0xFF0A0A0B), Color(0xFF141416), Color(0xFFFAFAFA), Color(0xFFE5B8A8), Color(0xFF9CA3AF), Color(0xFF2E2E34))
 }
 
 @Composable
