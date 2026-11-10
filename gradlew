@@ -1,3 +1,8 @@
 #!/bin/sh
 APP_HOME=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-exec "${JAVA_HOME:-java}/bin/java" -Dorg.gradle.appname=gradlew -classpath "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain "$@"
+if [ -n "${JAVA_HOME:-}" ]; then
+  JAVA_EXEC="$JAVA_HOME/bin/java"
+else
+  JAVA_EXEC="$(command -v java)"
+fi
+exec "$JAVA_EXEC" -Dorg.gradle.appname=gradlew -classpath "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain "$@"
